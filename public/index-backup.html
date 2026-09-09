@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فروشگاه آنتور</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial}
+body{margin:0;background:#f5f5f5;color:#222}
+header{background:#111;color:white;padding:20px;text-align:center;font-size:24px;font-weight:bold}
+.container{max-width:600px;margin:auto;padding:15px}
+button{cursor:pointer}
+.add{width:100%;padding:14px;border:0;border-radius:12px;background:#16a34a;color:white;font-size:17px;margin-bottom:15px}
+.product,.cart{background:white;border-radius:15px;padding:12px;margin-bottom:15px;box-shadow:0 2px 8px #0002}
+.product img{width:100%;height:220px;object-fit:cover;border-radius:12px}
+.product h3{margin:10px 0}
+.price{color:#16a34a;font-size:18px;font-weight:bold;margin-bottom:10px}
+.buy,.order{width:100%;padding:13px;border:0;border-radius:10px;background:#111;color:white;font-size:16px}
+.delete{width:100%;padding:10px;margin-top:7px;border:0;border-radius:10px;background:#eee}
+.modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:20px}
+.box{background:white;padding:20px;border-radius:15px;width:100%;max-width:500px}
+input,textarea{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
+.preview{width:100%;max-height:200px;object-fit:cover;border-radius:12px;display:none}
+.save{width:100%;padding:13px;border:0;border-radius:10px;background:#16a34a;color:white;margin-top:8px}
+.close{width:100%;padding:13px;border:0;border-radius:10px;background:#ddd;margin-top:8px}
+</style>
+</head>
+
+<body>
+
+<header>🛍️ فروشگاه آنتور</header>
+
+<div class="container">
+
+<button class="add" onclick="openModal()">➕ افزودن محصول</button>
+
+<div id="products"></div>
+
+<div class="cart">
+<h3>🛒 سبد خرید</h3>
+<div id="cart">سبد خرید خالی است</div>
+<hr>
+<strong>جمع: <span id="total">0</span> تومان</strong>
+
+<button class="order" onclick="openOrder()" style="margin-top:15px">
+📦 ثبت سفارش
+</button>
+</div>
+
+</div>
+
+<!-- افزودن محصول -->
+
+<div class="modal" id="modal">
+<div class="box">
+
+<h2>افزودن محصول</h2>
+
+<input id="name" placeholder="نام محصول">
+<input id="price" type="number" placeholder="قیمت به تومان">
+
+<input id="image" type="file" accept="image/*" onchange="previewImage(event)">
+
+<img id="preview" class="preview">
+
+<button class="save" onclick="addProduct()">ذخیره محصول</button>
+<button class="close" onclick="closeModal()">بستن</button>
+
+</div>
+</div>
+
+<!-- ثبت سفارش -->
+
+<div class="modal" id="orderModal">
+<div class="box">
+
+<h2>📦 اطلاعات سفارش</h2>
+
+<input id="customerName" placeholder="نام و نام خانوادگی">
+
+<input id="phone" type="tel" placeholder="شماره تماس">
+
+<textarea id="address" rows="4" placeholder="آدرس کامل"></textarea>
+
+<button class="save" onclick="submitOrder()">ارسال سفارش</button>
+
+<button class="close" onclick="closeOrder()">بستن</button>
+
+</div>
+</div>
+
+<script>
+
+let products=JSON.parse(localStorage.getItem("products"))||[];
+let cart=[];
+let selectedImage="";
+
+function previewImage(event){
+
+const file=event.target.files[0];
+
+if(!file)return;
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+selectedImage=e.target.result;
+
+const preview=document.getElementById("preview");
+
+preview.src=selectedImage;
+preview.style.display="block";
+
+};
+
+reader.readAsDataURL(file);
+}
+
+function showProducts(){
+
+const box=document.getElementById("products");
+
+box.innerHTML="";
+
+if(products.length===0){
+
+box.innerHTML="<p>هنوز محصولی اضافه نشده است.</p>";
+return;
+
+}
+
+products.forEach((p,i)=>{
+
+box.innerHTML+=`
+
+<div class="product">
+
+<img src="${p.image}">
+
+<h3>${p.name}</h3>
+
+<div class="price">
+${Number(p.price).toLocaleString()} تومان
+</div>
+
+<button class="buy" onclick="addToCart(${i})">
+🛒 افزودن به سبد
+</button>
+
+<button class="delete" onclick="deleteProduct(${i})">
+🗑️ حذف محصول
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+function addProduct(){
+
+const name=document.getElementById("name").value;
+const price=document.getElementById("price").value;
+
+if(!name||!price){
+
+alert("نام و قیمت را وارد کن");
+return;
+
+}
+
+products.push({
+
+name:name,
+price:Number(price),
+image:selectedImage||""
+
+});
+
+localStorage.setItem("products",JSON.stringify(products));
+
+document.getElementById("name").value="";
+document.getElementById("price").value="";
+document.getElementById("image").value="";
+
+selectedImage="";
+
+closeModal();
+showProducts();
+
+}
+
+function deleteProduct(i){
+
+if(confirm("این محصول حذف شود؟")){
+
+products.splice(i,1);
+
+localStorage.setItem("products",JSON.stringify(products));
+
+showProducts();
+
+}
+
+}
+
+function addToCart(i){
+
+cart.push(products[i]);
+
+showCart();
+
+}
+
+function removeCart(i){
+
+cart.splice(i,1);
+
+showCart();
+
+}
+
+function showCart(){
+
+const box=document.getElementById("cart");
+
+if(cart.length===0){
+
+box.innerHTML="سبد خرید خالی است";
+document.getElementById("total").innerText="0";
+return;
+
+}
+
+box.innerHTML="";
+
+let total=0;
+
+cart.forEach((p,i)=>{
+
+total+=Number(p.price);
+
+box.innerHTML+=`
+
+<div>
+
+<strong>${p.name}</strong><br>
+${Number(p.price).toLocaleString()} تومان
+
+<button onclick="removeCart(${i})">❌</button>
+
+</div>
+
+<hr>
+
+`;
+
+});
+
+document.getElementById("total").innerText=total.toLocaleString();
+
+}
+
+function openModal(){
+
+document.getElementById("modal").style.display="flex";
+
+}
+
+function closeModal(){
+
+document.getElementById("modal").style.display="none";
+
+}
+
+function openOrder(){
+
+if(cart.length===0){
+
+alert("اول یک محصول به سبد خرید اضافه کن");
+return;
+
+}
+
+document.getElementById("orderModal").style.display="flex";
+
+}
+
+function closeOrder(){
+
+document.getElementById("orderModal").style.display="none";
+
+}
+
+function submitOrder(){
+
+const name=document.getElementById("customerName").value;
+const phone=document.getElementById("phone").value;
+const address=document.getElementById("address").value;
+
+if(!name||!phone||!address){
+
+alert("لطفاً همه اطلاعات را وارد کن");
+return;
+
+}
+
+let message="سفارش جدید%0A%0A";
+
+message+="نام: "+encodeURIComponent(name)+"%0A";
+message+="تلفن: "+encodeURIComponent(phone)+"%0A";
+message+="آدرس: "+encodeURIComponent(address)+"%0A%0A";
+
+message+="محصولات:%0A";
+
+cart.forEach(p=>{
+
+message+=encodeURIComponent(p.name)+" - "+p.price+" تومان%0A";
+
+});
+
+message+="%0Aجمع: "+encodeURIComponent(document.getElementById("total").innerText)+" تومان";
+
+alert("سفارش آماده ارسال است!");
+
+window.open("https://wa.me/989309851273?text="+message,"_blank");
+window.open(wa.me/?text="+message,"_blank");
+
+}
+
+showProducts();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فروشگاه آنتور</title>
+<style>
+body{margin:0;background:#f5f5f5;font-family:Arial;color:#222}
+header{background:#111;color:#fff;padding:20px;text-align:center;font-size:24px}
+main{max-width:600px;margin:auto;padding:15px}
+button{border:0;border-radius:10px;padding:13px;font-size:16px}
+.add{width:100%;background:#16a34a;color:white;margin-bottom:15px}
+.card{background:white;padding:12px;border-radius:15px;margin-bottom:15px}
+.card img{width:100%;height:210px;object-fit:cover;border-radius:10px}
+.price{color:#16a34a;font-weight:bold;font-size:18px;margin:8px 0}
+.buy{width:100%;background:#111;color:white}
+.delete{width:100%;background:#eee;margin-top:7px}
+.cart{background:white;padding:15px;border-radius:15px;margin-top:20px}
+.order{width:100%;background:#111;color:white;margin-top:12px}
+.modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;padding:20px}
+.box{background:white;padding:20px;border-radius:15px;width:100%;max-width:500px}
+input,textarea{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}
+.save{width:100%;background:#16a34a;color:white}
+.close{width:100%;background:#ddd;margin-top:7px}
+#preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;display:none}
+</style>
+</head>
+
+<body>
+
+<header>🛍️ فروشگاه آنتور</header>
+
+<main>
+
+<button class="add" onclick="openAdd()">➕ افزودن محصول</button>
+
+<div id="products"></div>
+
+<div class="cart">
+<h3>🛒 سبد خرید</h3>
+<div id="cart">سبد خرید خالی است</div>
+<hr>
+<b>جمع: <span id="total">0</span> تومان</b>
+<button class="order" onclick="openOrder()">📦 ثبت سفارش</button>
+</div>
+
+</main>
+
+<div class="modal" id="addModal">
+<div class="box">
+<h2>افزودن محصول</h2>
+
+<input id="name" placeholder="نام محصول">
+<input id="price" type="number" placeholder="قیمت به تومان">
+
+<input id="image" type="file" accept="image/*" onchange="chooseImage(event)">
+<img id="preview">
+
+<button class="save" onclick="saveProduct()">ذخیره محصول</button>
+<button class="close" onclick="closeAdd()">بستن</button>
+</div>
+</div>
+
+<div class="modal" id="orderModal">
+<div class="box">
+<h2>📦 ثبت سفارش</h2>
+
+<input id="customerName" placeholder="نام و نام خانوادگی">
+<input id="phone" placeholder="شماره تماس">
+<textarea id="address" rows="4" placeholder="آدرس"></textarea>
+
+<button class="save" onclick="sendOrder()">ارسال به واتساپ</button>
+<button class="close" onclick="closeOrder()">بستن</button>
+</div>
+</div>
+
+<script>
+let products=JSON.parse(localStorage.getItem("products")||"[]");
+let cart=[];
+let selectedImage="";
+
+function openAdd(){
+document.getElementById("addModal").style.display="flex";
+}
+
+function closeAdd(){
+document.getElementById("addModal").style.display="none";
+}
+
+function openOrder(){
+if(cart.length===0){
+alert("اول محصول را به سبد خرید اضافه کن");
+return;
+}
+document.getElementById("orderModal").style.display="flex";
+}
+
+function closeOrder(){
+document.getElementById("orderModal").style.display="none";
+}
+
+function chooseImage(e){
+let file=e.target.files[0];
+if(!file)return;
+
+let reader=new FileReader();
+
+reader.onload=function(){
+selectedImage=reader.result;
+let p=document.getElementById("preview");
+p.src=selectedImage;
+p.style.display="block";
+};
+
+reader.readAsDataURL(file);
+}
+
+function saveProduct(){
+
+let name=document.getElementById("name").value.trim();
+let price=document.getElementById("price").value;
+
+if(!name||!price){
+alert("نام و قیمت را وارد کن");
+return;
+}
+
+products.push({
+name:name,
+price:Number(price),
+image:selectedImage
+});
+
+localStorage.setItem("products",JSON.stringify(products));
+
+document.getElementById("name").value="";
+document.getElementById("price").value="";
+document.getElementById("image").value="";
+document.getElementById("preview").style.display="none";
+selectedImage="";
+
+closeAdd();
+showProducts();
+
+alert("محصول ذخیره شد ✅");
+}
+
+function showProducts(){
+
+let box=document.getElementById("products");
+
+if(products.length===0){
+box.innerHTML="<p>هنوز محصولی اضافه نشده.</p>";
+return;
+}
+
+box.innerHTML=products.map((p,i)=>`
+<div class="card">
+
+${p.image?`<img src="${p.image}">`:""}
+
+<h3>${p.name}</h3>
+
+<div class="price">
+${p.price.toLocaleString()} تومان
+</div>
+
+<button class="buy" onclick="addCart(${i})">
+🛒 افزودن به سبد
+</button>
+
+<button class="delete" onclick="removeProduct(${i})">
+🗑️ حذف
+</button>
+
+</div>
+`).join("");
+}
+
+function removeProduct(i){
+if(confirm("محصول حذف شود؟")){
+products.splice(i,1);
+localStorage.setItem("products",JSON.stringify(products));
+showProducts();
+}
+}
+
+function addCart(i){
+cart.push(products[i]);
+showCart();
+}
+
+function removeCart(i){
+cart.splice(i,1);
+showCart();
+}
+
+function showCart(){
+
+let box=document.getElementById("cart");
+
+if(cart.length===0){
+box.innerHTML="سبد خرید خالی است";
+document.getElementById("total").innerText="0";
+return;
+}
+
+let total=0;
+
+box.innerHTML=cart.map((p,i)=>{
+total+=p.price;
+
+return `
+<div>
+<b>${p.name}</b>
+<br>
+${p.price.toLocaleString()} تومان
+<button onclick="removeCart(${i})">❌</button>
+</div>
+<hr>
+`;
+}).join("");
+
+document.getElementById("total").innerText=total.toLocaleString();
+}
+
+function sendOrder(){
+
+let name=document.getElementById("customerName").value.trim();
+let phone=document.getElementById("phone").value.trim();
+let address=document.getElementById("address").value.trim();
+
+if(!name||!phone||!address){
+alert("لطفاً همه اطلاعات را وارد کن");
+return;
+}
+
+let total=cart.reduce((sum,p)=>sum+p.price,0);
+
+let text="سفارش جدید از فروشگاه آنتور\n\n";
+text+="نام: "+name+"\n";
+text+="تلفن: "+phone+"\n";
+text+="آدرس: "+address+"\n\n";
+text+="محصولات:\n";
+
+cart.forEach(p=>{
+text+="- "+p.name+" : "+p.price.toLocaleString()+" تومان\n";
+});
+
+text+="\nجمع: "+total.toLocaleString()+" تومان";
+
+let url="https://wa.me/989309851273?text="+encodeURIComponent(text);
+
+window.location.href=url;
+}
+
+showProducts();
+</script>
+
+</body>
+</html>
