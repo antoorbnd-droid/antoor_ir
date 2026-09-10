@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.antor.shop'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.antor.shop'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+}
