@@ -1,502 +1,61 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ÙØ±ÙˆØ´Ú¯Ø§Ù‡ Ø¢Ù†ØªÙˆØ±</title>
-
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#f3f4f6;color:#222;font-family:Arial,sans-serif}
-header{background:#111;color:#fff;padding:20px;text-align:center}
-header h1{margin:0 0 8px;font-size:25px}
-header p{margin:0;color:#ccc}
-main{max-width:650px;margin:auto;padding:15px}
-button{border:0;border-radius:10px;padding:12px;font-size:15px}
-.adminBtn{width:100%;background:#16a34a;color:white;margin-bottom:12px}
-.search{width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin-bottom:10px}
-.categories{display:flex;gap:7px;overflow:auto;margin-bottom:15px}
-.categories button{background:white;white-space:nowrap}
-.categories button.active{background:#111;color:white}
-.card{background:white;border-radius:16px;padding:12px;margin-bottom:15px;box-shadow:0 2px 10px #0001}
-.card img{width:100%;height:220px;object-fit:cover;border-radius:12px}
-.card h3{margin:10px 0 5px}
-.category{font-size:13px;color:#777}
-.price{color:#16a34a;font-size:19px;font-weight:bold;margin:8px 0}
-.stock{font-size:14px;margin-bottom:10px}
-.buy{width:100%;background:#111;color:white}
-.buy:disabled{background:#aaa}
-.edit,.delete{width:49%;margin-top:7px}
-.edit{background:#eee}
-.delete{background:#fee2e2;color:#991b1b}
-.cart{background:white;padding:15px;border-radius:16px;margin-top:20px}
-.order{width:100%;background:#111;color:white;margin-top:12px}
-.modal{display:none;position:fixed;inset:0;background:#0009;align-items:center;justify-content:center;padding:18px;z-index:10}
-.box{background:white;border-radius:16px;padding:20px;width:100%;max-width:520px;max-height:90vh;overflow:auto}
-input,textarea,select{width:100%;padding:13px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
-.save{width:100%;background:#16a34a;color:white;margin-top:8px}
-.close{width:100%;background:#ddd;margin-top:7px}
-#preview{width:100%;max-height:200px;object-fit:cover;border-radius:12px;display:none;margin-top:8px}
-.empty{text-align:center;padding:25px;color:#777}
-.total{font-size:18px}
-</style>
-</head>
-
-<body>
-
-<header>
-<h1>ğŸ›ï¸ ÙØ±ÙˆØ´Ú¯Ø§Ù‡ Ø¢Ù†ØªÙˆØ±</h1>
-<p>Ø®Ø±ÛŒØ¯ Ø¢Ø³Ø§Ù† Ùˆ Ø³Ø±ÛŒØ¹</p>
-</header>
-
-<main>
-
-<button class="adminBtn" onclick="openAdd()">â• Ø§ÙØ²ÙˆØ¯Ù† Ù…Ø­ØµÙˆÙ„</button>
-
-<input class="search" id="search" placeholder="ğŸ” Ø¬Ø³ØªØ¬ÙˆÛŒ Ù…Ø­ØµÙˆÙ„..." oninput="showProducts()">
-
-<div class="categories" id="categories"></div>
-
-<div id="products"></div>
-
-<div class="cart">
-<h3>ğŸ›’ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯</h3>
-<div id="cart">Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª</div>
-<hr>
-<div class="total">
-Ø¬Ù…Ø¹: <b id="total">0</b> ØªÙˆÙ…Ø§Ù†
-</div>
-<button class="order" onclick="openOrder()">ğŸ“¦ Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´</button>
-</div>
-
-</main>
-
-<!-- Ø§ÙØ²ÙˆØ¯Ù† / ÙˆÛŒØ±Ø§ÛŒØ´ -->
-
-<div class="modal" id="productModal">
-<div class="box">
-
-<h2 id="modalTitle">â• Ø§ÙØ²ÙˆØ¯Ù† Ù…Ø­ØµÙˆÙ„</h2>
-
-<input id="name" placeholder="Ù†Ø§Ù… Ù…Ø­ØµÙˆÙ„">
-
-<input id="price" type="number" placeholder="Ù‚ÛŒÙ…Øª Ø¨Ù‡ ØªÙˆÙ…Ø§Ù†">
-
-<input id="stock" type="number" placeholder="Ù…ÙˆØ¬ÙˆØ¯ÛŒ">
-
-<input id="category" placeholder="Ø¯Ø³ØªÙ‡â€ŒØ¨Ù†Ø¯ÛŒØ› Ù…Ø«Ù„Ø§Ù‹ Ø¹Ø·Ø±">
-
-<input id="image" type="file" accept="image/*" onchange="chooseImage(event)">
-
-<img id="preview">
-
-<button class="save" onclick="saveProduct()">Ø°Ø®ÛŒØ±Ù‡ Ù…Ø­ØµÙˆÙ„</button>
-<button class="close" onclick="closeProduct()">Ø¨Ø³ØªÙ†</button>
-
-</div>
-</div>
-
-<!-- Ø³ÙØ§Ø±Ø´ -->
-
-<div class="modal" id="orderModal">
-<div class="box">
-
-<h2>ğŸ“¦ Ø«Ø¨Øª Ø³ÙØ§Ø±Ø´</h2>
-
-<input id="customerName" placeholder="Ù†Ø§Ù… Ùˆ Ù†Ø§Ù… Ø®Ø§Ù†ÙˆØ§Ø¯Ú¯ÛŒ">
-
-<input id="phone" placeholder="Ø´Ù…Ø§Ø±Ù‡ ØªÙ…Ø§Ø³">
-
-<textarea id="address" rows="4" placeholder="Ø¢Ø¯Ø±Ø³ Ú©Ø§Ù…Ù„"></textarea>
-
-<button class="save" onclick="sendOrder()">ğŸ“² Ø§Ø±Ø³Ø§Ù„ Ø¨Ù‡ ÙˆØ§ØªØ³Ø§Ù¾</button>
-<button class="close" onclick="closeOrder()">Ø¨Ø³ØªÙ†</button>
-
-</div>
-</div>
-
-<script>
-
-let products=JSON.parse(localStorage.getItem("products")||"[]");
-let cart=[];
-let selectedImage="";
-let editIndex=-1;
-let currentCategory="Ù‡Ù…Ù‡";
-
-function saveData(){
-localStorage.setItem("products",JSON.stringify(products));
-}
-
-function openAdd(){
-
-editIndex=-1;
-selectedImage="";
-
-document.getElementById("modalTitle").innerText="â• Ø§ÙØ²ÙˆØ¯Ù† Ù…Ø­ØµÙˆÙ„";
-document.getElementById("name").value="";
-document.getElementById("price").value="";
-document.getElementById("stock").value="";
-document.getElementById("category").value="";
-document.getElementById("image").value="";
-
-document.getElementById("preview").style.display="none";
-
-document.getElementById("productModal").style.display="flex";
-}
-
-function closeProduct(){
-document.getElementById("productModal").style.display="none";
-}
-
-function chooseImage(e){
-
-let file=e.target.files[0];
-
-if(!file)return;
-
-let reader=new FileReader();
-
-reader.onload=function(){
-
-selectedImage=reader.result;
-
-let preview=document.getElementById("preview");
-
-preview.src=selectedImage;
-preview.style.display="block";
-
-};
-
-reader.readAsDataURL(file);
-}
-
-function saveProduct(){
-
-let name=document.getElementById("name").value.trim();
-let price=Number(document.getElementById("price").value);
-let stock=Number(document.getElementById("stock").value||0);
-let category=document.getElementById("category").value.trim()||"Ø¹Ù…ÙˆÙ…ÛŒ";
-
-if(!name||!price){
-
-alert("Ù†Ø§Ù… Ùˆ Ù‚ÛŒÙ…Øª Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†");
-return;
-}
-
-if(editIndex===-1){
-
-products.push({
-name:name,
-price:price,
-stock:stock,
-category:category,
-image:selectedImage
-});
-
-}else{
-
-products[editIndex].name=name;
-products[editIndex].price=price;
-products[editIndex].stock=stock;
-products[editIndex].category=category;
-
-if(selectedImage){
-products[editIndex].image=selectedImage;
-}
-
-}
-
-saveData();
-closeProduct();
-showProducts();
-showCategories();
-
-alert("Ø°Ø®ÛŒØ±Ù‡ Ø´Ø¯ âœ…");
-}
-
-function editProduct(i){
-
-editIndex=i;
-selectedImage="";
-
-let p=products[i];
-
-document.getElementById("modalTitle").innerText="âœï¸ ÙˆÛŒØ±Ø§ÛŒØ´ Ù…Ø­ØµÙˆÙ„";
-document.getElementById("name").value=p.name;
-document.getElementById("price").value=p.price;
-document.getElementById("stock").value=p.stock||0;
-document.getElementById("category").value=p.category||"Ø¹Ù…ÙˆÙ…ÛŒ";
-
-let preview=document.getElementById("preview");
-
-if(p.image){
-
-preview.src=p.image;
-preview.style.display="block";
-
-}else{
-
-preview.style.display="none";
-
-}
-
-document.getElementById("productModal").style.display="flex";
-}
-
-function deleteProduct(i){
-
-if(!confirm("Ø§ÛŒÙ† Ù…Ø­ØµÙˆÙ„ Ø­Ø°Ù Ø´ÙˆØ¯ØŸ"))return;
-
-products.splice(i,1);
-saveData();
-showProducts();
-showCategories();
-}
-
-function showCategories(){
-
-let cats=["Ù‡Ù…Ù‡"];
-
-products.forEach(p=>{
-
-let c=p.category||"Ø¹Ù…ÙˆÙ…ÛŒ";
-
-if(!cats.includes(c))cats.push(c);
-
-});
-
-let box=document.getElementById("categories");
-
-box.innerHTML=cats.map(c=>`
-
-<button class="${currentCategory===c?"active":""}"
-onclick="setCategory('${escapeText(c)}')">
-
-${c}
-
-</button>
-
-`).join("");
-}
-
-function setCategory(c){
-
-currentCategory=c;
-showCategories();
-showProducts();
-}
-
-function escapeText(s){
-
-return s.replace(/'/g,"&#39;");
-
-}
-
-function showProducts(){
-
-let box=document.getElementById("products");
-
-let search=document.getElementById("search").value.trim().toLowerCase();
-
-let list=products.filter(p=>{
-
-let matchSearch=p.name.toLowerCase().includes(search);
-
-let matchCategory=currentCategory==="Ù‡Ù…Ù‡" ||
-(p.category||"Ø¹Ù…ÙˆÙ…ÛŒ")===currentCategory;
-
-return matchSearch&&matchCategory;
-
-});
-
-if(list.length===0){
-
-box.innerHTML='<div class="empty">Ù…Ø­ØµÙˆÙ„ÛŒ Ù¾ÛŒØ¯Ø§ Ù†Ø´Ø¯.</div>';
-return;
-}
-
-box.innerHTML=list.map(p=>{
-
-let i=products.indexOf(p);
-let stock=p.stock||0;
-
-return `
-
-<div class="card">
-
-${p.image?`<img src="${p.image}">`:""}
-
-<h3>${p.name}</h3>
-
-<div class="category">
-Ø¯Ø³ØªÙ‡: ${p.category||"Ø¹Ù…ÙˆÙ…ÛŒ"}
-</div>
-
-<div class="price">
-${p.price.toLocaleString()} ØªÙˆÙ…Ø§Ù†
-</div>
-
-<div class="stock">
-${stock>0?"Ù…ÙˆØ¬ÙˆØ¯ÛŒ: "+stock:"Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯"}
-</div>
-
-<button class="buy"
-${stock<=0?"disabled":""}
-onclick="addCart(${i})">
-
-${stock>0?"ğŸ›’ Ø§ÙØ²ÙˆØ¯Ù† Ø¨Ù‡ Ø³Ø¨Ø¯":"Ù†Ø§Ù…ÙˆØ¬ÙˆØ¯"}
-
-</button>
-
-<button class="edit" onclick="editProduct(${i})">
-âœï¸ ÙˆÛŒØ±Ø§ÛŒØ´
-</button>
-
-<button class="delete" onclick="deleteProduct(${i})">
-ğŸ—‘ï¸ Ø­Ø°Ù
-</button>
-
-</div>
-
-`;
-
-}).join("");
-}
-
-function addCart(i){
-
-if(products[i].stock<=0){
-
-alert("Ø§ÛŒÙ† Ù…Ø­ØµÙˆÙ„ Ù…ÙˆØ¬ÙˆØ¯ Ù†ÛŒØ³Øª");
-return;
-}
-
-cart.push(products[i]);
-products[i].stock--;
-
-saveData();
-
-showProducts();
-showCart();
-}
-
-function removeCart(i){
-
-let p=cart[i];
-
-let product=products.find(x=>x.name===p.name);
-
-if(product)product.stock++;
-
-cart.splice(i,1);
-
-saveData();
-
-showProducts();
-showCart();
-}
-
-function showCart(){
-
-let box=document.getElementById("cart");
-
-if(cart.length===0){
-
-box.innerHTML="Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø®Ø§Ù„ÛŒ Ø§Ø³Øª";
-document.getElementById("total").innerText="0";
-return;
-
-}
-
-let total=0;
-
-box.innerHTML=cart.map((p,i)=>{
-
-total+=p.price;
-
-return `
-
-<div>
-
-<b>${p.name}</b>
-<br>
-
-${p.price.toLocaleString()} ØªÙˆÙ…Ø§Ù†
-
-<button onclick="removeCart(${i})">
-âŒ
-</button>
-
-</div>
-
-<hr>
-
-`;
-
-}).join("");
-
-document.getElementById("total").innerText=total.toLocaleString();
-}
-
-function openOrder(){
-
-if(cart.length===0){
-
-alert("Ø§ÙˆÙ„ Ù…Ø­ØµÙˆÙ„ÛŒ Ø¨Ù‡ Ø³Ø¨Ø¯ Ø®Ø±ÛŒØ¯ Ø§Ø¶Ø§ÙÙ‡ Ú©Ù†");
-return;
-}
-
-document.getElementById("orderModal").style.display="flex";
-}
-
-function closeOrder(){
-
-document.getElementById("orderModal").style.display="none";
-}
-
-function sendOrder(){
-
-let name=document.getElementById("customerName").value.trim();
-let phone=document.getElementById("phone").value.trim();
-let address=document.getElementById("address").value.trim();
-
-if(!name||!phone||!address){
-
-alert("Ù„Ø·ÙØ§Ù‹ Ù‡Ù…Ù‡ Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†");
-return;
-}
-
-let total=cart.reduce((sum,p)=>sum+p.price,0);
-
-let text=
-"ğŸ›ï¸ Ø³ÙØ§Ø±Ø´ Ø¬Ø¯ÛŒØ¯ Ø§Ø² ÙØ±ÙˆØ´Ú¯Ø§Ù‡ Ø¢Ù†ØªÙˆØ±\n\n"+
-"ğŸ‘¤ Ù†Ø§Ù…: "+name+"\n"+
-"ğŸ“ ØªÙ„ÙÙ†: "+phone+"\n"+
-"ğŸ“ Ø¢Ø¯Ø±Ø³: "+address+"\n\n"+
-"ğŸ“¦ Ù…Ø­ØµÙˆÙ„Ø§Øª:\n";
-
-cart.forEach(p=>{
-
-text+="- "+p.name+" : "+
-p.price.toLocaleString()+" ØªÙˆÙ…Ø§Ù†\n";
-
-});
-
-text+="\nğŸ’° Ø¬Ù…Ø¹: "+
-total.toLocaleString()+" ØªÙˆÙ…Ø§Ù†";
-
-let url=
-"https://wa.me/989309851273?text="+
-encodeURIComponent(text);
-
-window.location.href=url;
-}
-
-showCategories();
-showProducts();
-showCart();
-
-</script>
-
-</body>
-</html>
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111"><title>Ù…Ø§Ù†Ø§Øª</title><style>*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial;background:#f5f5f5;color:#111}.top{background:#111;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:5}.brand{font-size:25px;font-weight:900}.sub{opacity:0.7;font-size:12px}.wrap{max-width:900px;margin:auto;padding:14px}.search{width:100%;padding:13px;border:0;border-radius:14px;margin:12px 0;font-size:15px}.cats{display:flex;gap:8px;overflow:auto;padding-bottom:10px}.cats button,.btn{border:0;border-radius:12px;padding:10px 14px;background:#fff}.cats .onp,.primar{background:#111;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px #0002}.pic{height:160px;background:#eee;display:flex;align-items:center;justify-content:center}.pic img{width:100%;height:100%;object-fit:cover}.info{padding:11px}.name{font-weight:bold}.price{margin-top:7px;font-weight:bold}.old{text-decoration:line-through;color:#999;font-size:12px;margin-left:6px}.actions{display:flex;gap:7px;margin-top:10px}.actions button{flex:1}.fav{font-size:20px;background:#fff;border:0}.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:10px;z-index:6}.page{padding-bottom:70px}.panel{background:#fff;border-radius:16px;padding:15px;margin-top:14px}.panel input,.panel select,.panel textarea{width:100%;padding:11px;margin:5px 0 - 9px;border:1px solid #ddd;border-radius:10px;font-family:inherit}.hide{display:none}.row{display:flex;gap:8px}.row>*{ flex:1}.empty{text-align:center;padding:35px;color:#777}.order{border:1px solid #eee;padding:10px;border-radius:12px;margin:8px 07}@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}.pic{height:190px}</style></head><body><div class="top"><div class="brand">Ø¬Ø§Ù†ÙˆØ§Ùª </div><div class="sub">Ø¯ÙŠØ© Ø¨Ø§ÙˆØ§Ù† ÙˆØ§Ø©</div></div><main class="wrap page"><input id="search" class="search" placeholder="Ù…Ø§Ù†Ù†Ù‡ Ø¨Ø§ÙˆØ§Ù†Ù… Ø§Ù†Ù…Ù‡Ù‡Ù‡Ø§Ù†..."  oninput="render()"><div id="cats" class="cats"></div><div`id="products" class="grid"></div><section id="cart" class="panel hide"><h3>ğŸ˜‘Ú“ Ø§Ù†Ø§Ø¨Ø±ÙˆØ§</h3><div id="cartList"></div><div id="customer"></div><button class="btn primary" onclick="sendOrder()">Ø±ÙˆØ§Ø¨Ø±Ù„Ø§ÙˆÙˆØ© Ø§Ù† Ø¨Ø§ÙˆØ§Ù†Ù†Ù† Ø¨Ø§ÙˆØ§Ù‡Ø§Ù‡</button></section><section id="admin" class="panel hide"><h3>âš‚ï¸Ø§Ù„Ø¨Ø§Ø«</h3><di id="login"><input id="pass" type="password" placeholder="Ù†Ø§Ù‡Ù†Ù„ Ø§Ù„ØªØ§Ø¨Ø§Ø§Ø¨"><button class="btn primary" onclick="login()">Ø¨Ø§Ù„Ø§Ø§Ù†Ø§Ø§Øª Ø¨Ø§ÙˆØ§Ù†Ù†Ù† Ø§Ù„</button></div><di id="adminForm" class="hide"><input id="pn" placeholder="Ø§Ù‡Ù†Ø§Øª Ø¨Ø§ÙˆØ§Ù†Ù…"><div class="row"><input id="pp" type="number" placeholder="Ù…Ø§Ù†Ù… Ø§Ù„Ø¨Ø§Ø¨Ø§ÙˆØ§Ù†Ù†Ù†"><input id="pd" type="number" placeholder="Ù…Ø§Ù†Ù… Ø§Ù„ØªØ§Ø¨Ø§ÙˆØ§Ù†Ù†Ù†"></div><div class="row"><input id="ps" type="number" placeholder="Ù…Ø§ÙˆØ§Ù†Ø§Ù… Ø¨Ø§ÙˆØ§Ù†Ù†Ù†"><input id="pc" placeholder="Ù…Ø§Ù„Ø§Ø§Ø¨Ø§ÙˆØ§Ù†Ù†Ù†"></div><textarea id="px" placeholder="Ù…Ø§Ù„Ø§Ø§Ø¨Ø§ÙˆØ§Ù†Ù†Ù† Ø§Ù„</textarea><input id="pi" type="file" accept="image/*"><br><button class="btn primary" onclick="saveProduct()">Ø§Ù„Ø§Ø§Ø¨Ø§ÙˆØ§Ù†Ù†Ù† Ø¨Ø§ÙˆØ§Ù†Ù… Ø§Ù‡Ù†Ù†Ù† </button><div id="manage"></div><hr/><h3>âš¡ Ø§Ù„Ø§Ø¨Ø±Ø§Ù†Ù‡Ø§Ù† Ø¨Ø§ÙˆØ§Ù†Ù†Ù† </h3><div id="orders"></div></div></section></main><nav class="bottom"><bitton class="btn" onclick="show('home')">ğŸ†€Ø§Ù„Ø§Ø§Øª Ø¨Ø§ÙˆØ§Ù†Ù†Ù† </button><button class="btn" onclick="show('cart')">ğŸ”¤ Ø¨Ø§ÙˆØ§Ù†Ù†Ù† (<span id="count">0</span>)</button><button class="btn" onclick="show('admin')">ğŸ“ˆ Ø§Ù„ØªØ§Ø¨Ø§Ø§Ù† </button></nav><script>const WA="989309851273";let products=JSON.parse(localStorage.antor_products\|'[]'),cart=JSON.parse(localStorage.antor_cart||'[]'),favs=JSON.parse(localStorage.antor_favs|'[]'),orders=JSON.parse(localStorage.antor_orders|'[]'),editId=null,logged=false;if(!products.length){products=[{id:1,n:'Ù…Ø§Ù‡Ù†Ø§Ù… Ø¨Ø§ÙˆØ§Ù†Ù†Ù†",ŒLŒÎŒLÎ‰öa¶av*6)ö)ö*6)öb6)öa¶a¶aˆ‹NˆˆŸWNÜØ]™J
+_Y[˜İ[ÛˆØ]™J
+^ÛØØ[İÜ˜YÙK˜[Ü—Ü›ÙXİÏR”ÓÓ‹œİš[™ÚYJ›ÙXİÊNÛØØ[İÜ˜YÙK˜[Ü—ØØ\R”ÓÓ‹œİš[™ÚYJØ\
+NÛØØ[İÜ˜YÙK˜[Ü—Ù˜]œÏR”ÓÓ‹œİš[™ÚYJ˜]œÊNÛØØ[İÜ˜YÙK˜[Ü—ÛÜ™\œÏR”ÓÓ‹œİš[™ÚYJÜ™\œÊ_Y[˜İ[ÛˆØ]Ê
+^Û]OIö)öa¶av)ö*‹	Ë‹‹›™]ÈÙ]
+›ÙXİË›X\
+O˜ß	öa¶)öaöa¶a¶aˆœ¤¥tí‘½Õµ•¹Ğ¹•Ñ±•µ•¹Ñ	å% …ÑÌœ¤¹¥¹¹•É!Q50õ„¹µ…À ¡à±¤¤ôù€ñ‰ÉÕÑÑ½¸±…ÍÌôˆ‘í¤üœèœœè½¸ôˆ½¹±¥¬ô‰™¥±Ñ•É…Ğ œ‘íáôœ¤ˆùíáôğ½‰ÕÑÑ½¸ù€¤¹©½¥¸ œœ¥õ±•ĞÍ•±•Ñ•ôŸbŸffbŸb¨€œí™Õ¹Ñ¥½¸™¥±Ñ•É…Ğ¡à¥íÍ•±•Ñ•õàíÉ•¹‘•È ¥õ™Õ¹Ñ¥½¸É•¹‘•È ¥í…ÑÌ ¤í±•ÑÄõ‘½Õµ•¹Ğ¹•Ñ±•µ•¹Ñ	å% Í•…É œ¤¹Ù…±Õ”¹ÑÉ¥´ ¤±„õÁÉ½‘ÕÑÌ¹™¥±Ñ•È¡àôø¡Í•±•Ñ•ôôŸbŸffbŸb¨€ññà¹ŒõÍ•±•Ñ•¤˜˜„¡Åñññ¸¹¥¹±Õ‘•Ì¡Ä¤¤í‘½Õµ•¹Ğ¹•Ñ±•µ•¹Ñ	å% ÁÉ½‘ÕÑÌœ¤¹¥¹¹•É!Q50õ„¹±•¹Ñ ıŒ¡…É¤¹©½¥¸ œœ¤èñ‘¥Ø±…ÍÌô•µÁÑäœûbŸfbŸf#bŸfffƒb£bŸf#bŸfffÙ]‰ÎÙØİ[Y[™Ù][[Y[RY
+	ØÛİ[	ÊK^ÛÛ[XØ\œ™YXÙJ
+ËJOœÊÊœ]_
+K
+NßY[˜İ[ÛˆØ\™
+
+^Û]^œ
+
+ŠKJ™
+KÌL
+NÜ™]\›ˆÜİ[ÛˆÛ\ÜÏH˜Ø\™]ˆÛ\ÜÏHœXÈŞšOÏ[YÈÜ˜ÏH‰Şš_H‰ÏÜ[ˆİ[OH™›Û\Ú^™NL¼'äíÜÜ[‰ßOÙ]]ˆÛ\ÜÏHš[™›È]ˆÛ\ÜÏH›˜[YH¼›ŸH]ÛˆÛ\ÜÏH™˜]ˆˆÛ˜ÛXÚÏH™˜]Š	ŞšYJH‰Ù˜]œËš[˜ÛY\ÊšY
+OÉ×Ùš[WÚXÛÛ—Ûİ™IÎ‰×LMÉßOØ]ÛÙ]]‰Ş	ßOÙ]]ˆÛ\ÜÏHœšXÙHÜ‹ÓØØ[Tİš[™Ê
+_H6,vb6)ö*6)ö)öaˆ	Ş™ØÜ[ˆÛ\ÜÏH›Û‰ŞœÓØØ[İš[™Ê
+_OÜÜ[˜‰ÉßOÙ]ÛX[¶,vb6)ö*6)ö)öaˆ	Şœß_ÜÛX[]ˆÛ\ÜÏH˜Xİ[ÛœÈ]ÛˆÛ\ÜÏH˜ˆš[X\HˆÛ˜ÛXÚÏH˜Y
+	ŞšYJH¶av)öa6)ö)ö*6)öb6)öa¶a¶aˆØ]ÛÙ]Ù]ÜÜİ[Û˜Y[˜İ[Ûˆ˜]ŠY
+^Ù˜]œÏY˜]œËš[˜ÛY\ÊY
+OÙ˜]œË™š[\ŠOOZY
+N–Ë‹‹™˜]œËYNÜØ]™J
+NÜ™[™\Š
+_Y[˜İ[ÛˆY
+Y
+^Û]\›ÙXİË™š[™
+OšYOZY
+NÚYŠ^œÏJ\™]\›Û]OXØ\™š[™
+OO˜KšYOZY
+NÜOÜKœ^JÊ˜Ø\œ\Ú
+ÚY]NŒ_JNŞœËKNÜØ]™J
+NÜ™[™\Š
+NØ[\
+	ĞƒH6)öa6)ö*6)ö)öaˆØ[\ˆ	Ê_Y[˜İ[ÛˆÚİÊ
+^ÙØİ[Y[™Ù][[Y[RY
+	Ü›ÙXİÉÊK˜Û\ÜË›\İÙÙÛJ	ÚYIËOIÚÛYIÊNÙØİ[Y[™Ù][[Y[RY
+	ÜÙX\˜Ú	ÊKÙÙÛPÛ\ÜÊ	ÚYIËOIÚÛYIÊNÙØİ[Y[™Ù][[Y[RY
+	ØØ]ÉÊKÙÙÛPÛ\ÜÊ	ÚYIËOIÚÛYIÊNÙØİ[Y[™Ù][[Y[RY
+	ØØ\	ÊK˜Û\ÜË›\İÙÙÛJ	ÚYIËOIØØ\	ÊNÙØİ[Y[™Ù][[Y[RY
+	ØYZ[‰ÊK˜Û\ÜË›\İÙÙÛJ	ÚYIËOIØYZ[‰ÊNÚYŠOIØØ\	ÊH™[™\Ø\
+
+NÚYŠOIØYZ[‰ÊH™[™\YZ[Š
+_Y[˜İ[Ûˆ™[™\Ø\
+
+^Û][YØİ[Y[™Ù][[Y[RY
+	ØØ\\İ	ÊNÚYŠXØ]\›[™İ
+^Ù[š[›™\’SIÏ]ˆÛ\ÜÏH™[\H¶)öa6)öb6)öa¶a¶aˆ6*6)öb6)öa¶a¶aˆÙ]‰ÎÙØİ[Y[™Ù][[Y[RY
+	Øİ\İÛY\‰ÊKš[›™\’SIÉÎßY[Ù^Û]İ[LÙ[š[›™\’SXØ\›X\
+OOÛ]\›ÙXİË™š[™
+OO˜KšYO\KšY
+K^œ
+ŠKJ™
+KÌL
+Nİİ[
+Ï\ŠœKœ]NÜ™]\›ˆ]ˆÛ\ÜÏH›Ü™\ˆ‰Ş›ŸOØˆ8§ È	ÜKœ]_Oœ‰ÊŠœKœ]JKÓØØ[Tİš[™Ê
+_H6,vb6)ö*6)ö)öaˆœ]ÛˆÛ˜ÛXÚÏHœ›™[[İ™PØ\
+	ŞšYJH¶)öa6)öb6)öa¶a¶aˆØ]ÛÙ]˜JKš›Ú[Š	ÉÊNÙØİ[Y[™Ù][[Y[RY
+	Øİ\İÛY\‰ÊKš[›™\’SX[œ]YH˜ÛˆˆXÙZÛ\H¶av)öa6)ö)ö*6)öb6)öa¶a¶aˆ[œ]YH˜İˆXÙZÛ\H¶av)öa6)öb6)öa¶a¶aˆ^\™XHYH˜ØHˆXÙZÛ\H¶av)öa6)ö)ö*6)öb6)öa¶a¶aˆİ^\™XO¶,vb6)ö*6)öb6)öa¶a¶aˆ	İİ[ÓØØ[Tİš[™Ê
+_Hˆ6)öa6)öb6)öa¶a¶aˆğ½ˆù€íõô
